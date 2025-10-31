@@ -2,7 +2,6 @@ use eval::eval::Evaluator;
 use eval::eval::Printable;
 use std::io;
 
-#[main]
 fn main() {
    println!("Rust-APL version 0.0.1");
    let mut reader = io::buffered::BufferedReader::new(io::stdin());
