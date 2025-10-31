@@ -1,0 +1,14 @@
+[package]
+name = "rust-apl"
+version = "0.0.1"
+edition = "2015"
+
+[lib]
+name = "rust-apl"
+path = "src/lib.rs"
+
+[[bin]]
+name = "apl"
+path = "src/apl.rs"
+
+[dependencies]

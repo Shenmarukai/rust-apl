@@ -1,0 +1,67 @@
+pub mod tokenizer;
+pub mod parser;
+pub mod nodes;
+pub mod math_constants;
+pub mod eval {
+    pub mod eval;
+    pub mod add;
+    pub mod subtract;
+    pub mod multiply;
+    pub mod divide;
+    pub mod maximum;
+    pub mod minimum;
+    pub mod exponential;
+
+    pub mod conjugate;
+    pub mod negate;
+    pub mod reciprocal;
+    pub mod sign;
+    pub mod magnitude;
+    pub mod ceiling;
+    pub mod floor;
+    pub mod power;
+
+    pub mod array_helpers;
+
+    #[cfg(test)]
+    mod test_eval;
+    #[cfg(test)]
+    mod test_add;
+    #[cfg(test)]
+    mod test_subtract;
+    #[cfg(test)]
+    mod test_multiply;
+    #[cfg(test)]
+    mod test_divide;
+    #[cfg(test)]
+    mod test_conjugate;
+    #[cfg(test)]
+    mod test_negate;
+    #[cfg(test)]
+    mod test_reciprocal;
+    #[cfg(test)]
+    mod test_sign;
+    #[cfg(test)]
+    mod test_magnitude;
+    #[cfg(test)]
+    mod test_ceiling;
+    #[cfg(test)]
+    mod test_maximum;
+    #[cfg(test)]
+    mod test_floor;
+    #[cfg(test)]
+    mod test_minimum;
+    #[cfg(test)]
+    mod test_exponential;
+    #[cfg(test)]
+    mod test_power;
+}
+
+#[cfg(test)]
+mod test_tokenizer;
+#[cfg(test)]
+mod test_parser;
+#[cfg(test)]
+mod test_utils;
+
+mod apl;
