@@ -11,8 +11,8 @@
 
 ## Future Goals:
 - Possibly extend APL2 with *unit tagged* numbers:
+  - This would enable unique operator behavior between like and different *unit tagged* numbers.
   - This would enable a form of type safety without introducing the complexity of *composite / aggregate* types.
-  - This would enable unique operations behavior between like and different *unit tagged* numbers.
   - This could enable the generalization / extension of complex numbers into the realm of quaternions or the multivectors of geometric algebras.
 - Possibly banch APL into a new compiled language.
   - This would enable apl to operate in more resource constrained environments like micro-controllers.
