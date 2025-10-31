@@ -1,17 +1,17 @@
 # Rust-APL
 
-## Experimental APL interpreter in Rust. LGPL 3.0 License.
+### Experimental APL interpreter in Rust. LGPL 3.0 License.
 
 ***Respect to the original creator/developer [AngryLawyer](https://github.com/AngryLawyer) for making the initial implementation of this 13 years ago!***
 
-Aiming for a feature complete APL2 interpreter *and maybe compiler?*.
+### Aiming for a feature complete APL2 interpreter *and maybe compiler?*.
 
-Initial Goals:
+## Initial Goals:
 - Convert to modern Rust.
 - APL2 feature parity.
 - GPU acceleration via [Rust-GPU](https://github.com/Rust-GPU/rust-gpu)
 
-Future Goals:
+## Future Goals:
 - Possibly extend APL2 with *unit tagged* numbers:
   - This would enable a form of type safety without introducing the complexity of *composite / aggregate* types.
   - This would enable unique operations behavior between like and different *unit tagged* numbers.
@@ -21,4 +21,4 @@ Future Goals:
   - This could enable zero cost *unit tagged* operator specialization.
   - This could enable making APL a performant inline language like [rust-cpp](https://github.com/mystor/rust-cpp) does with C++.
 
-Definitely not ready for actual use. You have been warned.
+***Definitely not ready for actual use. You have been warned.***
