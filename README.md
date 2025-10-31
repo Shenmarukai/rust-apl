@@ -4,7 +4,7 @@
 
 ***Respect to the original creator/developer [AngryLawyer](https://github.com/AngryLawyer) for making the initial implementation of this 13 years ago!***
 
-Aiming for a feature complete APL2 implementation.
+Aiming for a feature complete APL2 interpreter *and maybe compiler?*.
 
 Initial Goals:
 - Convert to modern Rust.
