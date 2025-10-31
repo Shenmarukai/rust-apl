@@ -4,11 +4,11 @@ version = "0.0.1"
 edition = "2015"
 
 [lib]
-name = "rust-apl"
+name = "rust_apl"
 path = "src/lib.rs"
 
 [[bin]]
-name = "apl"
+name = "rust-apl"
 path = "src/apl.rs"
 
 [dependencies]
