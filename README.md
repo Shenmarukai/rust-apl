@@ -1,7 +1,7 @@
 # Rust-APL
 
-### Experimental APL interpreter in Rust. LGPL 3.0 License.
-### Aiming for a feature complete APL2 interpreter *and maybe compiler?*.
+- Experimental APL interpreter in Rust. LGPL 3.0 License.
+- Aiming for a feature complete APL2 interpreter *and maybe compiler?*.
 
 ***Respect to the original creator/developer [AngryLawyer](https://github.com/AngryLawyer) for making the initial implementation of this 13 years ago!***
 
