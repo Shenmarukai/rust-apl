@@ -1,9 +1,16 @@
 use std::str;
-use num::complex::{Complex, Complex64};
-
-use crate::parser;
-use crate::nodes::{self, EvalNode};
-use crate::tokenizer;
+use num::complex::{
+    Complex,
+    Complex64,
+};
+use crate::{
+    tokenizer::Token,
+    parser::Parser,
+    nodes::{
+        Node,
+        EvalNode,
+    },
+};
 
 pub trait Printable {
     fn to_string(&self) -> String;
@@ -21,14 +28,14 @@ pub enum Value {
 impl Printable for Value {
 
     fn to_string(&self) -> String {
-        match self {
-            &Value::AplFloat(f) => {
+        match *self {
+            Value::AplFloat(f) => {
                 format!("{}", f)
             },
-            &Value::AplInteger(i) => {
+            Value::AplInteger(i) => {
                 format!("{}", i)
             },
-            &Value::AplArray(depth, ref _dimensions, ref contents) => {
+            Value::AplArray(depth, ref _dimensions, ref contents) => {
                 if depth != 1 {
                     panic!("Multidimensional arrays aren't yet supported");
                 }
@@ -36,41 +43,41 @@ impl Printable for Value {
 
                 segments.join(" ")
             },
-            &Value::AplComplex(j) => {
+            Value::AplComplex(j) => {
                 format!("{}J{}", j.re, j.im)
             }
         }
     }
 
     fn to_typed_string(&self) -> String {
-        match self {
-            &Value::AplFloat(_) => {
+        match *self {
+            Value::AplFloat(_) => {
                 format!("FLOAT({})", self.to_string())
             },
-            &Value::AplInteger(_) => {
+            Value::AplInteger(_) => {
                 format!("INTEGER({})", self.to_string())
             },
-            &Value::AplArray(_, _, _) => {
+            Value::AplArray(_, _, _) => {
                 format!("ARRAY({})", self.to_string())
             },
-            &Value::AplComplex(_) => {
+            Value::AplComplex(_) => {
                 format!("COMPLEX({})", self.to_string())
             }
         }
     }
 }
 
-pub fn eval_node(node: &nodes::Node) -> Result<Box<Value>,String> {
+pub fn eval_node(node: &Node) -> Result<Box<Value>,String> {
     match node {
-        &nodes::Node::Array(ref nodes) => Ok(eval_array(nodes)),
+        Node::Array(nodes) => Ok(eval_array(nodes)),
         _ => node.eval()
     }
 }
 
-fn eval_array(tokens: &Vec<Box<tokenizer::Token>>) -> Box<Value> {
+fn eval_array(tokens: &[Box<Token>]) -> Box<Value> {
     if tokens.len() == 1 {
         match &tokens[0].as_ref() {
-            &tokenizer::Token::Number(token_data) => {
+            &Token::Number(token_data) => {
                 eval_number(&token_data.string)
             },
             _ => {
@@ -81,7 +88,7 @@ fn eval_array(tokens: &Vec<Box<tokenizer::Token>>) -> Box<Value> {
         let mut array_contents: Vec<Box<Value>> = vec![];
         for token in tokens.iter() {
             match token.as_ref() {
-                &tokenizer::Token::Number(ref token_data) => {
+                Token::Number(token_data) => {
                     array_contents.push(eval_number(&token_data.string))
                 },
                 _ => {
@@ -112,7 +119,7 @@ fn eval_number(token_string: &str) -> Box<Value> {
     }
 }
 
-fn get_string_and_sign<'r>(token_string: &'r str) -> (&'r str, bool){
+fn get_string_and_sign(token_string: &str) -> (&str, bool){
     if let Some(rest) = token_string.strip_prefix('¯') {
         (rest, true)
     } else {
@@ -178,7 +185,7 @@ fn eval_int(token_string: &str) -> Box<Value> {
     }
 }
 
-pub fn eval_dyadic<F>(func: F, left: &nodes::Node, right: &nodes::Node) -> Result<Box<Value>, String> where F: Fn(&Value, &Value) -> Result<Box<Value>, String> {
+pub fn eval_dyadic<F>(func: F, left: &Node, right: &Node) -> Result<Box<Value>, String> where F: Fn(&Value, &Value) -> Result<Box<Value>, String> {
     match eval_node(left) {
         Ok(left) => {
             match eval_node(right) {
@@ -196,21 +203,21 @@ pub fn eval_dyadic<F>(func: F, left: &nodes::Node, right: &nodes::Node) -> Resul
     }
 }
 
-pub fn eval_monadic<F>(func: F, left: &nodes::Node) -> Result<Box<Value>, String> where F: Fn(&Value) -> Result<Box<Value>, String> {
+pub fn eval_monadic<F>(func: F, left: &Node) -> Result<Box<Value>, String> where F: Fn(&Value) -> Result<Box<Value>, String> {
     eval_node(left).and_then(|result| {
         func(&result)
     })
 }
 
 pub struct Evaluator {
-    parser: Box<parser::Parser>
+    parser: Box<Parser>
 }
 
 impl Evaluator {
 
     pub fn new(input_string: String) -> Evaluator {
         Evaluator {
-            parser: Box::new(parser::Parser::new(input_string))
+            parser: Box::new(Parser::new(input_string))
         }
     }
 

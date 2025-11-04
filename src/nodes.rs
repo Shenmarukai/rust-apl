@@ -1,24 +1,28 @@
-use crate::tokenizer::Token;
-use crate::tokenizer::TokenData;
-use crate::eval::eval::Value;
-use crate::parser::Parser;
-
-use crate::eval::add::eval_addition;
-use crate::eval::subtract::eval_subtraction;
-use crate::eval::multiply::eval_multiplication;
-use crate::eval::divide::eval_division;
-use crate::eval::maximum::eval_maximum;
-use crate::eval::minimum::eval_minimum;
-use crate::eval::exponential::eval_exponential;
-
-use crate::eval::conjugate::eval_conjugate;
-use crate::eval::negate::eval_negate;
-use crate::eval::reciprocal::eval_reciprocal;
-use crate::eval::sign::eval_sign;
-use crate::eval::magnitude::eval_magnitude;
-use crate::eval::ceiling::eval_ceiling;
-use crate::eval::floor::eval_floor;
-use crate::eval::power::eval_power;
+use crate::{
+    tokenizer::{
+        Token,
+        TokenData,
+    },
+    parser::Parser,
+    eval::{
+        eval::Value,
+        add::eval_addition,
+        subtract::eval_subtraction,
+        multiply::eval_multiplication,
+        divide::eval_division,
+        maximum::eval_maximum,
+        minimum::eval_minimum,
+        exponential::eval_exponential,
+        conjugate::eval_conjugate,
+        negate::eval_negate,
+        reciprocal::eval_reciprocal,
+        sign::eval_sign,
+        magnitude::eval_magnitude,
+        ceiling::eval_ceiling,
+        floor::eval_floor,
+        power::eval_power,
+    },
+};
 
 pub trait EvalNode {
     fn eval(&self) -> Result<Box<Value>, String>;
@@ -88,22 +92,22 @@ pub enum Node {
 impl EvalNode for Node {
     fn eval(&self) -> Result<Box<Value>, String> {
         match self {
-            &Node::Addition(_, ref left, ref right) => eval_addition(left, right),
-            &Node::Subtraction(_, ref left, ref right) => eval_subtraction(left, right),
-            &Node::Multiplication(_, ref left, ref right) => eval_multiplication(left, right),
-            &Node::Division(_, ref left, ref right) => eval_division(left, right),
-            &Node::Maximum(_, ref left, ref right) => eval_maximum(left, right),
-            &Node::Minimum(_, ref left, ref right) => eval_minimum(left, right),
-            &Node::Power(_, ref left, ref right) => eval_power(left, right),
+            Node::Addition(_, left, right) => eval_addition(left, right),
+            Node::Subtraction(_, left, right) => eval_subtraction(left, right),
+            Node::Multiplication(_, left, right) => eval_multiplication(left, right),
+            Node::Division(_, left, right) => eval_division(left, right),
+            Node::Maximum(_, left, right) => eval_maximum(left, right),
+            Node::Minimum(_, left, right) => eval_minimum(left, right),
+            Node::Power(_, left, right) => eval_power(left, right),
 
-            &Node::Conjugate(_, ref left) => eval_conjugate(left),
-            &Node::Negate(_, ref left) => eval_negate(left),
-            &Node::Reciprocal(_, ref left) => eval_reciprocal(left),
-            &Node::Sign(_, ref left) => eval_sign(left),
-            &Node::Magnitude(_, ref left) => eval_magnitude(left),
-            &Node::Ceiling(_, ref left) => eval_ceiling(left),
-            &Node::Floor(_, ref left) => eval_floor(left),
-            &Node::Exponential(_, ref left) => eval_exponential(left),
+            Node::Conjugate(_, left) => eval_conjugate(left),
+            Node::Negate(_, left) => eval_negate(left),
+            Node::Reciprocal(_, left) => eval_reciprocal(left),
+            Node::Sign(_, left) => eval_sign(left),
+            Node::Magnitude(_, left) => eval_magnitude(left),
+            Node::Ceiling(_, left) => eval_ceiling(left),
+            Node::Floor(_, left) => eval_floor(left),
+            Node::Exponential(_, left) => eval_exponential(left),
 
             _ => Err("Not yet implemented".to_string())
         }

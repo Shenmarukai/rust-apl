@@ -1,6 +1,11 @@
-use rust_apl::eval::eval::Evaluator;
-use rust_apl::eval::eval::Printable;
-use std::io::{stdin, BufRead};
+use std::io::{
+    stdin,
+    BufRead,
+};
+use rust_apl::eval::eval::{
+    Evaluator,
+    Printable,
+};
 
 fn main() {
    println!("Rust-APL version 0.0.1");

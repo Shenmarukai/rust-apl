@@ -1,6 +1,13 @@
-use crate::nodes;
-use crate::eval::array_helpers::{simple_monadic_array};
-use crate::eval::eval::{Value, eval_monadic};
+use crate::{
+    nodes::Node,
+    eval::{
+        eval::{
+            Value,
+            eval_monadic,
+        },
+        array_helpers::simple_monadic_array,
+    },
+};
 
 pub fn negate(first: &Value) -> Result<Box<Value>, String> {
     match first{
@@ -13,12 +20,12 @@ pub fn negate(first: &Value) -> Result<Box<Value>, String> {
         &Value::AplComplex(c) => {
             Ok(Box::new(Value::AplComplex(-c)))
         },
-        &Value::AplArray(ref _depth, ref _dimensions, ref _values) => {
+        Value::AplArray(_depth, _dimensions, _values) => {
             simple_monadic_array(negate, first)
         }
     }
 }
 
-pub fn eval_negate(left: &nodes::Node) -> Result<Box<Value>, String> {
+pub fn eval_negate(left: &Node) -> Result<Box<Value>, String> {
     eval_monadic(negate, left)
 }

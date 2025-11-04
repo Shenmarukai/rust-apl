@@ -1,9 +1,15 @@
-use crate::nodes;
-
-use crate::eval::array_helpers::{simple_monadic_array};
-use crate::eval::eval::{Value, eval_monadic};
-use crate::eval::divide::divide;
-use crate::eval::magnitude::magnitude;
+use crate::{
+    nodes::Node,
+    eval::{
+        eval::{
+            Value,
+            eval_monadic,
+	    },
+		array_helpers::simple_monadic_array,
+        divide::divide,
+        magnitude::magnitude,
+    },
+};
 
 pub fn sign(first: &Value) -> Result<Box<Value>, String> {
     match first {
@@ -30,12 +36,12 @@ pub fn sign(first: &Value) -> Result<Box<Value>, String> {
                 divide(first, &magnituded)
             })
         },
-        &Value::AplArray(ref _depth, ref _dimensions, ref _values) => {
+        Value::AplArray(_depth, _dimensions, _values) => {
             simple_monadic_array(sign, first)
         }
     }
 }
 
-pub fn eval_sign(left: &nodes::Node) -> Result<Box<Value>, String> {
+pub fn eval_sign(left: &Node) -> Result<Box<Value>, String> {
     eval_monadic(sign, left)
 }

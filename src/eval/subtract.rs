@@ -1,55 +1,68 @@
-use num::complex::{Complex, Complex64};
-
-use crate::nodes;
-use crate::eval::eval::{Value, eval_dyadic};
-use crate::eval::array_helpers::{simple_dyadic_array, dual_dyadic_array, inverse_simple_dyadic_array};
+use num::complex::{
+    Complex,
+    Complex64
+};
+use crate::{
+    nodes::Node,
+    eval::{
+        eval::{
+            Value,
+            eval_dyadic,
+        },
+        array_helpers::{
+            simple_dyadic_array,
+            dual_dyadic_array,
+            inverse_simple_dyadic_array,
+        },
+    },
+};
 
 fn subtract_float(f: f64, other:&Value) -> Result<Box<Value>, String> {
-    match other {
-        &Value::AplFloat(val) => {
+    match *other {
+        Value::AplFloat(val) => {
             Ok(Box::new(Value::AplFloat(f - val)))
         },
-        &Value::AplInteger(val) => {
+        Value::AplInteger(val) => {
             subtract_float(f, &Value::AplFloat(val as f64))
         },
-        &Value::AplComplex(_val) => {
+        Value::AplComplex(_val) => {
             subtract_complex(&Complex::new(f, 0.0), other)
         },
-        &Value::AplArray(_, _, _) => {
+        Value::AplArray(_, _, _) => {
             simple_dyadic_array(subtract_float, f, other)
         }
     }
 }
 
 fn subtract_integer(i: isize, other:&Value) -> Result<Box<Value>, String> {
-    match other {
-        &Value::AplFloat(_val) => {
+    match *other {
+        Value::AplFloat(_val) => {
             subtract_float(i as f64, other)
         },
-        &Value::AplInteger(val) => {
+        Value::AplInteger(val) => {
             Ok(Box::new(Value::AplInteger(i - val)))
         },
-        &Value::AplComplex(_val) => {
+        Value::AplComplex(_val) => {
             subtract_complex(&Complex::new(i as f64, 0.0), other)
         },
-        &Value::AplArray(_, _, _) => {
+        Value::AplArray(_, _, _) => {
             simple_dyadic_array(subtract_integer, i, other)
         }
     }
 }
 
 fn subtract_complex(c: &Complex64, other: &Value) -> Result<Box<Value>, String> {
-    match other {
-        &Value::AplFloat(f) => {
+    match *other {
+        Value::AplFloat(f) => {
             subtract_complex(c, &Value::AplComplex(Complex::new(f, 0.0)))
         },
-        &Value::AplInteger(i) => {
+        Value::AplInteger(i) => {
             subtract_complex(c, &Value::AplComplex(Complex::new(i as f64, 0.0)))
         },
-        &Value::AplComplex(other_c) => {
+        Value::AplComplex(other_c) => {
             Ok(Box::new(Value::AplComplex(c - other_c)))
         },
-        &Value::AplArray(_, _, _) => {
+        Value::AplArray(_, _, _) => {
             simple_dyadic_array(subtract_complex, c, other)
         }
     }
@@ -74,15 +87,15 @@ pub fn subtract(first: &Value, other: &Value) -> Result<Box<Value>, String> {
         &Value::AplInteger(i) => {
             subtract_integer(i, other)
         }
-        &Value::AplComplex(ref c) => {
+        Value::AplComplex(c) => {
             subtract_complex(c, other)
         },
-        &Value::AplArray(ref _depth, ref _dimensions, ref _values) => {
+        Value::AplArray(_depth, _dimensions, _values) => {
             subtract_array(first, other)
         }
     }
 }
 
-pub fn eval_subtraction(left: &nodes::Node, right: &nodes::Node) -> Result<Box<Value>, String> {
+pub fn eval_subtraction(left: &Node, right: &Node) -> Result<Box<Value>, String> {
     eval_dyadic(subtract, left, right)
 }

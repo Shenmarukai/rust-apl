@@ -1,7 +1,6 @@
 pub mod tokenizer;
 pub mod parser;
 pub mod nodes;
-pub mod math_constants;
 pub mod eval {
     pub mod eval;
     pub mod add;

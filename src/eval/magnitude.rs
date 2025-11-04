@@ -1,7 +1,13 @@
-use crate::nodes;
-
-use crate::eval::array_helpers::{simple_monadic_array};
-use crate::eval::eval::{Value, eval_monadic};
+use crate::{
+    nodes::Node,
+    eval::{
+        eval::{
+            Value,
+            eval_monadic,
+        },
+        array_helpers::simple_monadic_array,
+	},
+};
 
 pub fn magnitude(first: &Value) -> Result<Box<Value>, String> {
     match first {
@@ -17,12 +23,12 @@ pub fn magnitude(first: &Value) -> Result<Box<Value>, String> {
             let iijj = ii + jj;
             Ok(Box::new(Value::AplFloat(iijj.sqrt())))
         },
-        &Value::AplArray(ref _depth, ref _dimensions, ref _values) => {
+        Value::AplArray(_depth, _dimensions, _values) => {
             simple_monadic_array(magnitude, first)
         }
     }
 }
 
-pub fn eval_magnitude(left: &nodes::Node) -> Result<Box<Value>, String> {
+pub fn eval_magnitude(left: &Node) -> Result<Box<Value>, String> {
     eval_monadic(magnitude, left)
 }

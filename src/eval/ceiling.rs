@@ -1,8 +1,14 @@
 use num::complex::Complex;
-use crate::nodes;
-
-use crate::eval::array_helpers::{simple_monadic_array};
-use crate::eval::eval::{Value, eval_monadic};
+use crate::{
+    nodes::Node,
+    eval::{
+        eval::{
+            Value,
+            eval_monadic,
+        },
+        array_helpers::simple_monadic_array,
+    },
+};
 
 pub fn ceiling(first: &Value) -> Result<Box<Value>, String> {
     match first {
@@ -13,14 +19,14 @@ pub fn ceiling(first: &Value) -> Result<Box<Value>, String> {
             Ok(Box::new(Value::AplInteger(val)))
         },
         &Value::AplComplex(c) => {
-            Ok(Box::new(Value::AplComplex(Complex::new(c.re.ceil() as f64, c.im.ceil() as f64))))
+            Ok(Box::new(Value::AplComplex(Complex::new(c.re.ceil(), c.im.ceil()))))
         },
-        &Value::AplArray(ref _depth, ref _dimensions, ref _values) => {
+        Value::AplArray(_depth, _dimensions, _values) => {
             simple_monadic_array(ceiling, first)
         }
     }
 }
 
-pub fn eval_ceiling(left: &nodes::Node) -> Result<Box<Value>, String> {
+pub fn eval_ceiling(left: &Node) -> Result<Box<Value>, String> {
     eval_monadic(ceiling, left)
 }
