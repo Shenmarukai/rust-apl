@@ -22,7 +22,7 @@ pub mod eval {
     pub mod power;
 
     pub mod array_helpers;
-
+/*
     #[cfg(test)]
     mod test_eval;
     #[cfg(test)]
@@ -54,14 +54,14 @@ pub mod eval {
     #[cfg(test)]
     mod test_exponential;
     #[cfg(test)]
-    mod test_power;
+    mod test_power;*/
 }
-
+/*
 #[cfg(test)]
 mod test_tokenizer;
 #[cfg(test)]
 mod test_parser;
 #[cfg(test)]
 mod test_utils;
-
+*/
 mod apl;

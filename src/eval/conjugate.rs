@@ -1,21 +1,21 @@
 use nodes;
 use eval::array_helpers::{simple_monadic_array};
-use eval::eval::{AplFloat, AplInteger, AplComplex, AplArray, Value, eval_monadic};
+use eval::eval::{Value, eval_monadic};
 
-pub fn conjugate(first: &Value) -> Result<~Value, ~str> {
+pub fn conjugate(first: &Value) -> Result<Box<Value>, String> {
     match first{
-        &AplFloat(_) | &AplInteger(_) => {
-            Ok(~(first.clone()))
+        &Value::AplFloat(_) | &Value::AplInteger(_) => {
+            Ok(Box::new(first.clone()))
         },
-        &AplComplex(c) => {
-            Ok(~AplComplex(c.conj()))
+        &Value::AplComplex(c) => {
+            Ok(Box::new(Value::AplComplex(c.conj())))
         },
-        &AplArray(ref _depth, ref _dimensions, ref _values) => {
+        &Value::AplArray(ref _depth, ref _dimensions, ref _values) => {
             simple_monadic_array(conjugate, first)
         }
     }
 }
 
-pub fn eval_conjugate(left: &nodes::Node) -> Result<~Value, ~str> {
+pub fn eval_conjugate(left: &nodes::Node) -> Result<Box<Value>, String> {
     eval_monadic(conjugate, left)
 }

@@ -1,20 +1,20 @@
-use eval::eval::{AplArray, Value};
+use eval::eval::Value;
 use std::result;
 
-pub fn simple_dyadic_array<T: Clone>(func: extern fn(T, &Value) -> result::Result<~Value, ~str>, param: T, other: &Value) -> result::Result<~Value, ~str> {
+pub fn simple_dyadic_array<T: Clone, F>(func: F, param: T, other: &Value) -> result::Result<Box<Value>, String> where F: Fn(T, &Value) -> result::Result<Box<Value>, String> {
     match other {
-        &AplArray(ref depth, ref dimensions, ref values) => {
-            let mut result_values: ~[~Value] = ~[];
-            let mut error_state = ~"";
+        &Value::AplArray(ref depth, ref dimensions, ref values) => {
+            let mut result_values: Vec<Box<Value>> = vec![];
+            let mut error_state = "".to_string();
             let mut errored = false;
 
-            for value in values.iter() { 
+            for value in values.iter() {
                 if !errored {
-                    match func(param.clone(), *value) {
-                        result::Ok(val) => {
+                    match func(param.clone(), &value) {
+                        result::Result::Ok(val) => {
                             result_values.push(val);
                         },
-                        result::Err(err) => {
+                        result::Result::Err(err) => {
                             errored = true;
                             error_state = err;
                         }
@@ -23,30 +23,30 @@ pub fn simple_dyadic_array<T: Clone>(func: extern fn(T, &Value) -> result::Resul
             };
 
             if errored {
-                result::Err(error_state)
+                result::Result::Err(error_state)
             } else {
-                result::Ok(~AplArray(depth.clone(), dimensions.clone(), result_values))
+                result::Result::Ok(Box::new(Value::AplArray(depth.clone(), dimensions.clone(), result_values)))
             }
         },
         _ => {
-            fail!("This should never be reached")
+            panic!("This should never be reached")
         }
     }
 }
 
-pub fn inverse_simple_dyadic_array<T: Clone>(func: extern fn(&Value, T) -> result::Result<~Value, ~str>, param: &Value, other: T) -> result::Result<~Value, ~str> {
+pub fn inverse_simple_dyadic_array<T: Clone, F>(func: F, param: &Value, other: T) -> result::Result<Box<Value>, String> where F: Fn(&Value, T) -> result::Result<Box<Value>, String> {
     match param {
-        &AplArray(ref depth, ref dimensions, ref values) => {
-            let mut result_values: ~[~Value] = ~[];
-            let mut error_state = ~"";
+        &Value::AplArray(ref depth, ref dimensions, ref values) => {
+            let mut result_values: Vec<Box<Value>> = vec![];
+            let mut error_state = "".to_string();
             let mut errored = false;
-            for value in values.iter() { 
+            for value in values.iter() {
                 if !errored {
-                    match func(*value, other.clone()) {
-                        result::Ok(val) => {
+                    match func(&value, other.clone()) {
+                        result::Result::Ok(val) => {
                             result_values.push(val);
                         },
-                        result::Err(err) => {
+                        result::Result::Err(err) => {
                             errored = true;
                             error_state = err;
                         }
@@ -55,40 +55,40 @@ pub fn inverse_simple_dyadic_array<T: Clone>(func: extern fn(&Value, T) -> resul
             }
 
             if errored {
-                result::Err(error_state)
+                result::Result::Err(error_state)
             } else {
-                result::Ok(~AplArray(depth.clone(), dimensions.clone(), result_values))
+                result::Result::Ok(Box::new(Value::AplArray(depth.clone(), dimensions.clone(), result_values)))
             }
         },
         _ => {
-            fail!("This should never be reached")
+            panic!("This should never be reached")
         }
     }
 }
 
-pub fn dual_dyadic_array(func: extern fn(&Value, &Value) -> result::Result<~Value, ~str>, param: &Value, other: &Value) -> result::Result<~Value, ~str> {
+pub fn dual_dyadic_array<F>(func: F, param: &Value, other: &Value) -> result::Result<Box<Value>, String> where F: Fn(&Value, &Value) -> result::Result<Box<Value>, String> {
     match param {
-        &AplArray(ref left_depth, ref left_dimensions, ref left_values) => {
+        &Value::AplArray(ref left_depth, ref left_dimensions, ref left_values) => {
             match other {
-                &AplArray(ref right_depth, ref right_dimensions, ref right_values) => {
+                &Value::AplArray(ref right_depth, ref right_dimensions, ref right_values) => {
                     //Different depths are considered a rank error
                     //Different shapes are considered a length error
                     if left_depth != right_depth {
-                        return result::Err(~"Rank error")
+                        return result::Result::Err("Rank error".to_string())
                     } else if left_dimensions != right_dimensions {
-                        return result::Err(~"Length error")
+                        return result::Result::Err("Length error".to_string())
                     }
 
-                    let mut result_values: ~[~Value] = ~[];
-                    let mut error_state = ~"";
+                    let mut result_values: Vec<Box<Value>> = vec![];
+                    let mut error_state = "".to_string();
                     let mut errored = false;
 
-                    for index in range(0, left_values.len()) {
-                        match func(left_values[index], right_values[index]) {
-                            result::Ok(val) => {
+                    for index in 0..left_values.len() {
+                        match func(&left_values[index], &right_values[index]) {
+                            result::Result::Ok(val) => {
                                 result_values.push(val);
                             },
-                            result::Err(err) => {
+                            result::Result::Err(err) => {
                                 error_state = err;
                                 errored = true;
                                 break;
@@ -97,36 +97,36 @@ pub fn dual_dyadic_array(func: extern fn(&Value, &Value) -> result::Result<~Valu
                     };
 
                     if errored {
-                        result::Err(error_state)
+                        result::Result::Err(error_state)
                     } else {
-                        result::Ok(~AplArray(left_depth.clone(), left_dimensions.clone(), result_values))
+                        result::Result::Ok(Box::new(Value::AplArray(left_depth.clone(), left_dimensions.clone(), result_values)))
                     }
                 },
                 _ => {
-                    fail!("This should never be reached")
+                    panic!("This should never be reached")
                 }
             }
         },
         _ => {
-            fail!("This should never be reached")
+            panic!("This should never be reached")
         }
     }
 }
 
-pub fn simple_monadic_array(func: extern fn(&Value) -> result::Result<~Value, ~str>, param: &Value) -> result::Result<~Value, ~str> {
+pub fn simple_monadic_array<F>(func: F, param: &Value) -> result::Result<Box<Value>, String> where F: Fn(&Value) -> result::Result<Box<Value>, String> {
     match param {
-        &AplArray(ref depth, ref dimensions, ref values) => {
-            let mut result_values: ~[~Value] = ~[];
-            let mut error_state = ~"";
+        &Value::AplArray(ref depth, ref dimensions, ref values) => {
+            let mut result_values: Vec<Box<Value>> = vec![];
+            let mut error_state = "".to_string();
             let mut errored = false;
 
-            for value in values.iter() { 
+            for value in values.iter() {
                 if !errored {
-                    match func(*value) {
-                        result::Ok(val) => {
+                    match func(&value) {
+                        result::Result::Ok(val) => {
                             result_values.push(val);
                         },
-                        result::Err(err) => {
+                        result::Result::Err(err) => {
                             errored = true;
                             error_state = err;
                         }
@@ -135,13 +135,13 @@ pub fn simple_monadic_array(func: extern fn(&Value) -> result::Result<~Value, ~s
             }
 
             if errored {
-                result::Err(error_state)
+                result::Result::Err(error_state)
             } else {
-                result::Ok(~AplArray(*depth, dimensions.clone(), result_values))
+                result::Result::Ok(Box::new(Value::AplArray(*depth, dimensions.clone(), result_values)))
             }
         },
         _ => {
-            fail!("This should never be reached")
+            panic!("This should never be reached")
         }
     }
 }

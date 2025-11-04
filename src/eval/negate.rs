@@ -1,24 +1,24 @@
 use nodes;
 use eval::array_helpers::{simple_monadic_array};
-use eval::eval::{AplFloat, AplInteger, AplComplex, AplArray, Value, eval_monadic};
+use eval::eval::{Value, eval_monadic};
 
-pub fn negate(first: &Value) -> Result<~Value, ~str> {
+pub fn negate(first: &Value) -> Result<Box<Value>, String> {
     match first{
-        &AplFloat(f) => {
-            Ok(~AplFloat(-f))
+        &Value::AplFloat(f) => {
+            Ok(Box::new(Value::AplFloat(-f)))
         },
-        &AplInteger(i) => {
-            Ok(~AplInteger(-i))
+        &Value::AplInteger(i) => {
+            Ok(Box::new(Value::AplInteger(-i)))
         }
-        &AplComplex(c) => {
-            Ok(~AplComplex(-c))
+        &Value::AplComplex(c) => {
+            Ok(Box::new(Value::AplComplex(-c)))
         },
-        &AplArray(ref _depth, ref _dimensions, ref _values) => {
+        &Value::AplArray(ref _depth, ref _dimensions, ref _values) => {
             simple_monadic_array(negate, first)
         }
     }
 }
 
-pub fn eval_negate(left: &nodes::Node) -> Result<~Value, ~str> {
+pub fn eval_negate(left: &nodes::Node) -> Result<Box<Value>, String> {
     eval_monadic(negate, left)
 }

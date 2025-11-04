@@ -1,41 +1,41 @@
 use nodes;
 
 use eval::array_helpers::{simple_monadic_array};
-use eval::eval::{AplFloat, AplInteger, AplComplex, AplArray, Value, eval_monadic};
+use eval::eval::{Value, eval_monadic};
 use eval::divide::divide;
 use eval::magnitude::magnitude;
 
-pub fn sign(first: &Value) -> Result<~Value, ~str> {
+pub fn sign(first: &Value) -> Result<Box<Value>, String> {
     match first {
-        &AplFloat(val) => {
+        &Value::AplFloat(val) => {
             Ok(if val < 0.0 {
-                ~AplInteger(-1)
+                Box::new(Value::AplInteger(-1))
             } else if val > 0.0 {
-                ~AplInteger(1)
+                Box::new(Value::AplInteger(1))
             } else {
-                ~AplInteger(0)
+                Box::new(Value::AplInteger(0))
             })
         },
-        &AplInteger(val) => {
+        &Value::AplInteger(val) => {
             Ok(if val < 0 {
-                ~AplInteger(-1)
+                Box::new(Value::AplInteger(-1))
             } else if val > 0 {
-                ~AplInteger(1)
+                Box::new(Value::AplInteger(1))
             } else {
-                ~AplInteger(0)
+                Box::new(Value::AplInteger(0))
             })
         },
-        &AplComplex(_c) => {
+        &Value::AplComplex(_c) => {
             magnitude(first).and_then(|magnituded| {
-                divide(first, magnituded)
+                divide(first, &magnituded)
             })
         },
-        &AplArray(ref _depth, ref _dimensions, ref _values) => {
+        &Value::AplArray(ref _depth, ref _dimensions, ref _values) => {
             simple_monadic_array(sign, first)
         }
     }
 }
 
-pub fn eval_sign(left: &nodes::Node) -> Result<~Value, ~str> {
+pub fn eval_sign(left: &nodes::Node) -> Result<Box<Value>, String> {
     eval_monadic(sign, left)
 }

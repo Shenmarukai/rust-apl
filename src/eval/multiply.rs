@@ -1,87 +1,87 @@
-use extra::complex::{Cmplx, Complex64};
+use num::complex::{Complex, Complex64};
 use nodes;
-use eval::eval::{AplFloat, AplInteger, AplComplex, AplArray, Value, eval_dyadic};
+use eval::eval::{Value, eval_dyadic};
 use eval::array_helpers::{simple_dyadic_array, dual_dyadic_array, inverse_simple_dyadic_array};
 
-fn multiply_float(f: f64, other:&Value) -> Result<~Value, ~str> {
+fn multiply_float(f: f64, other:&Value) -> Result<Box<Value>, String> {
     match other {
-        &AplFloat(val) => {
-            Ok(~AplFloat(f * val))
+        &Value::AplFloat(val) => {
+            Ok(Box::new(Value::AplFloat(f * val)))
         },
-        &AplInteger(val) => {
-            multiply_float(f, &AplFloat(val as f64))
+        &Value::AplInteger(val) => {
+            multiply_float(f, &Value::AplFloat(val as f64))
         },
-        &AplComplex(_val) => {
-            multiply_complex(&Cmplx::new(f, 0.0), other)
+        &Value::AplComplex(_val) => {
+            multiply_complex(&Complex::new(f, 0.0), other)
         },
-        &AplArray(_, _, _) => {
+        &Value::AplArray(_, _, _) => {
             simple_dyadic_array(multiply_float, f, other)
         }
     }
 }
 
-fn multiply_integer(i: int, other:&Value) -> Result<~Value, ~str> {
+fn multiply_integer(i: isize, other:&Value) -> Result<Box<Value>, String> {
     match other {
-        &AplFloat(_val) => {
+        &Value::AplFloat(_val) => {
             multiply_float(i as f64, other)
         },
-        &AplInteger(val) => {
-            Ok(~AplInteger(i * val))
+        &Value::AplInteger(val) => {
+            Ok(Box::new(Value::AplInteger(i * val)))
         },
-        &AplComplex(_val) => {
-            multiply_complex(&Cmplx::new(i as f64, 0.0), other)
+        &Value::AplComplex(_val) => {
+            multiply_complex(&Complex::new(i as f64, 0.0), other)
         },
-        &AplArray(_, _, _) => {
+        &Value::AplArray(_, _, _) => {
             simple_dyadic_array(multiply_integer, i, other)
         }
     }
 }
 
-fn multiply_complex(c: &Complex64, other: &Value) -> Result<~Value, ~str> {
+fn multiply_complex(c: &Complex64, other: &Value) -> Result<Box<Value>, String> {
     match other {
-        &AplFloat(f) => {
-            multiply_complex(c, &AplComplex(Cmplx::new(f, 0.0)))
+        &Value::AplFloat(f) => {
+            multiply_complex(c, &Value::AplComplex(Complex::new(f, 0.0)))
         },
-        &AplInteger(i) => {
-            multiply_complex(c, &AplComplex(Cmplx::new(i as f64, 0.0)))
+        &Value::AplInteger(i) => {
+            multiply_complex(c, &Value::AplComplex(Complex::new(i as f64, 0.0)))
         },
-        &AplComplex(other_c) => {
-            Ok(~AplComplex(c * other_c))
+        &Value::AplComplex(other_c) => {
+            Ok(Box::new(Value::AplComplex(c * other_c)))
         },
-        &AplArray(_, _, _) => {
+        &Value::AplArray(_, _, _) => {
             simple_dyadic_array(multiply_complex, c, other)
         }
     }
 }
 
-fn multiply_array(array: &Value, other: &Value) -> Result<~Value, ~str> {
+fn multiply_array(array: &Value, other: &Value) -> Result<Box<Value>, String> {
     match other {
-        &AplFloat(_) |  &AplInteger(_) | &AplComplex(_) => {
+        &Value::AplFloat(_) |  &Value::AplInteger(_) | &Value::AplComplex(_) => {
             inverse_simple_dyadic_array(multiply, array, other)
         },
-        &AplArray(_, _, _) => {
+        &Value::AplArray(_, _, _) => {
             dual_dyadic_array(multiply, array, other)
         }
     }
 }
 
-pub fn multiply(first: &Value, other: &Value) -> Result<~Value, ~str> {
+pub fn multiply(first: &Value, other: &Value) -> Result<Box<Value>, String> {
     match first{
-        &AplFloat(f) => {
+        &Value::AplFloat(f) => {
             multiply_float(f, other)
         },
-        &AplInteger(i) => {
+        &Value::AplInteger(i) => {
             multiply_integer(i, other)
         }
-        &AplComplex(ref c) => {
+        &Value::AplComplex(ref c) => {
             multiply_complex(c, other)
         },
-        &AplArray(ref _depth, ref _dimensions, ref _values) => {
+        &Value::AplArray(ref _depth, ref _dimensions, ref _values) => {
             multiply_array(first, other)
         }
     }
 }
 
-pub fn eval_multiplication(left: &nodes::Node, right: &nodes::Node) -> Result<~Value, ~str> {
+pub fn eval_multiplication(left: &nodes::Node, right: &nodes::Node) -> Result<Box<Value>, String> {
     eval_dyadic(multiply, left, right)
 }

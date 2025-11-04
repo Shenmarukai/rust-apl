@@ -12,3 +12,4 @@ name = "rust-apl"
 path = "src/apl.rs"
 
 [dependencies]
+num = "0.4.3"

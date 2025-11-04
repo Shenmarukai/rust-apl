@@ -1,6 +1,5 @@
 use std::str;
-use std::from_str::from_str;
-use extra::complex::{Cmplx, Complex64};
+use num::complex::{Complex, Complex64};
 
 use parser;
 use nodes;
@@ -8,98 +7,98 @@ use tokenizer;
 use nodes::EvalNode;
 
 pub trait Printable {
-    fn to_string(&self) -> ~str;
-    fn to_typed_string(&self) -> ~str;
+    fn to_string(&self) -> String;
+    fn to_typed_string(&self) -> String;
 }
 
-#[deriving(Eq, Clone)]
+#[derive(PartialEq, Clone)]
 pub enum Value {
     AplFloat(f64),
-    AplInteger(int),
+    AplInteger(isize),
     AplComplex(Complex64),
-    AplArray(uint, ~[uint], ~[~Value])
+    AplArray(usize, Vec<usize>, Vec<Box<Value>>)
 }
 
 impl Printable for Value {
 
-    fn to_string(&self) -> ~str {
+    fn to_string(&self) -> String {
         match self {
-            &AplFloat(f) => {
+            &Value::AplFloat(f) => {
                 format!("{}", f)
             },
-            &AplInteger(i) => {
+            &Value::AplInteger(i) => {
                 format!("{}", i)
             },
-            &AplArray(depth, ref _dimensions, ref contents) => {
+            &Value::AplArray(depth, ref _dimensions, ref contents) => {
                 if depth != 1 {
-                    fail!(~"Multidimensional arrays aren't yet supported");
+                    panic!("Multidimensional arrays aren't yet supported");
                 }
-                let segments: ~[~str] = contents.iter().map(|item| item.to_string()).collect();
+                let segments: Vec<String> = contents.iter().map(|item| item.to_string()).collect();
 
-                segments.connect(" ")
+                segments.join(" ")
             },
-            &AplComplex(j) => {
+            &Value::AplComplex(j) => {
                 format!("{}J{}", j.re, j.im)
             }
         }
     }
 
-    fn to_typed_string(&self) -> ~str {
+    fn to_typed_string(&self) -> String {
         match self {
-            &AplFloat(_) => {
+            &Value::AplFloat(_) => {
                 format!("FLOAT({})", self.to_string())
             },
-            &AplInteger(_) => {
+            &Value::AplInteger(_) => {
                 format!("INTEGER({})", self.to_string())
             },
-            &AplArray(_, _, _) => {
+            &Value::AplArray(_, _, _) => {
                 format!("ARRAY({})", self.to_string())
             },
-            &AplComplex(_) => {
+            &Value::AplComplex(_) => {
                 format!("COMPLEX({})", self.to_string())
             }
         }
     }
 }
 
-pub fn eval_node(node: &nodes::Node) -> Result<~Value,~str> {
+pub fn eval_node(node: &nodes::Node) -> Result<Box<Value>,String> {
     match node {
-        &nodes::Array(ref nodes) => Ok(eval_array(nodes)),
+        &nodes::Node::Array(ref nodes) => Ok(eval_array(nodes)),
         _ => node.eval()
     }
 }
 
-fn eval_array(tokens: &~[~tokenizer::Token]) -> ~Value {
+fn eval_array(tokens: &Vec<Box<tokenizer::Token>>) -> Box<Value> {
     if tokens.len() == 1 {
-        match &tokens[0] {
-            &~tokenizer::Number(ref token_data) => {
-                eval_number(token_data.string)
+        match &tokens[0].as_ref() {
+            &tokenizer::Token::Number(ref token_data) => {
+                eval_number(&token_data.string)
             },
             _ => {
-                fail!("Unsupported type in array")
+                panic!("Unsupported type in array")
             }
         }
     } else {
-        let mut array_contents: ~[~Value] = ~[];
+        let mut array_contents: Vec<Box<Value>> = vec![];
         for token in tokens.iter() {
-            match token {
-                &~tokenizer::Number(ref token_data) => {
-                    array_contents.push(eval_number(token_data.string))
+            match token.as_ref() {
+                &tokenizer::Token::Number(ref token_data) => {
+                    array_contents.push(eval_number(&token_data.string))
                 },
                 _ => {
-                    fail!("Unsupported type in array")
+                    panic!("Unsupported type in array")
                 }
             }
         }
-        ~AplArray(1, ~[array_contents.len()], array_contents)
+        Box::new(Value::AplArray(1, vec![array_contents.len()], array_contents))
     }
 }
 
-fn eval_number(token_string: &str) -> ~Value {
+fn eval_number(token_string: &str) -> Box<Value> {
     match token_string.find('J') {
         //FIXME: This needs to handle exponents
         Some(pos) => {
-            eval_complex(token_string.slice_to(pos), token_string.slice_from(pos + 1))
+            eval_complex(&token_string[..pos], &token_string[..pos + 1])
         },
         None => {
             match token_string.find('.') {
@@ -115,19 +114,18 @@ fn eval_number(token_string: &str) -> ~Value {
 }
 
 fn get_string_and_sign<'r>(token_string: &'r str) -> (&'r str, bool){
-    if token_string.char_at(0) == '¯' {
-        let range: str::CharRange = token_string.char_range_at(0);
-        (token_string.slice_from(range.next), true)
+    if let Some(rest) = token_string.strip_prefix('¯') {
+        (rest, true)
     } else {
         (token_string, false)
     }
 }
 
-fn eval_complex(left: &str, right: &str) -> ~Value {
+fn eval_complex(left: &str, right: &str) -> Box<Value> {
     let (left_match_string, left_is_negative) = get_string_and_sign(left);
     let (right_match_string, right_is_negative) = get_string_and_sign(right);
 
-    match (from_str::<f64>(left_match_string), from_str::<f64>(right_match_string)) {
+    match (left_match_string.parse::<f64>().ok(), right_match_string.parse::<f64>().ok()) {
         (Some(left_float), Some(right_float)) => {
             let left_final = if left_is_negative {
                 -left_float
@@ -139,54 +137,54 @@ fn eval_complex(left: &str, right: &str) -> ~Value {
             } else {
                 right_float
             };
-            ~AplComplex(Cmplx::new(left_final, right_final))
+            Box::new(Value::AplComplex(Complex::new(left_final, right_final)))
         },
         _ => {
-            fail!(format!("Bad complex {} {}", left, right))
+            panic!(format!("Bad complex {} {}", left, right))
         }
     }
 }
 
-fn eval_float(token_string: &str) -> ~Value {
+fn eval_float(token_string: &str) -> Box<Value> {
     let (match_string, is_negative) = get_string_and_sign(token_string);
 
-    match from_str::<f64>(match_string) {
+    match match_string.parse::<f64>().ok() {
         Some(fl) => {
             if is_negative {
-                ~AplFloat(-fl)
+                Box::new(Value::AplFloat(-fl))
             } else {
-                ~AplFloat(fl)
+                Box::new(Value::AplFloat(fl))
             }
         },
         None => {
-            fail!(format!("Bad float {}", token_string))
+            panic!(format!("Bad float {}", token_string))
         }
     }
 }
 
-fn eval_int(token_string: &str) -> ~Value {
+fn eval_int(token_string: &str) -> Box<Value> {
     let (match_string, is_negative) = get_string_and_sign(token_string);
 
-    match from_str::<int>(match_string) {
+    match match_string.parse::<isize>().ok() {
         Some(i) => {
             if is_negative {
-                ~AplInteger(-i)
+                Box::new(Value::AplInteger(-i))
             } else {
-                ~AplInteger(i)
+                Box::new(Value::AplInteger(i))
             }
         },
         None => {
-            fail!(format!("Bad int {}", token_string))
+            panic!(format!("Bad int {}", token_string))
         }
     }
 }
 
-pub fn eval_dyadic(func: extern fn(&Value, &Value) -> Result<~Value, ~str>, left: &nodes::Node, right: &nodes::Node) -> Result<~Value, ~str> {
+pub fn eval_dyadic<F>(func: F, left: &nodes::Node, right: &nodes::Node) -> Result<Box<Value>, String> where F: Fn(&Value, &Value) -> Result<Box<Value>, String> {
     match eval_node(left) {
         Ok(left) => {
             match eval_node(right) {
                 Ok(right) => {
-                    func(left, right)
+                    func(&left, &right)
                 },
                 Err(msg) => {
                     Err(msg)
@@ -199,29 +197,29 @@ pub fn eval_dyadic(func: extern fn(&Value, &Value) -> Result<~Value, ~str>, left
     }
 }
 
-pub fn eval_monadic(func: extern fn(&Value) -> Result<~Value, ~str>, left: &nodes::Node) -> Result<~Value, ~str> {
+pub fn eval_monadic<F>(func: F, left: &nodes::Node) -> Result<Box<Value>, String> where F: Fn(&Value) -> Result<Box<Value>, String> {
     eval_node(left).and_then(|result| {
-        func(result)
+        func(&result)
     })
 }
 
 pub struct Evaluator {
-    parser: ~parser::Parser
+    parser: Box<parser::Parser>
 }
 
 impl Evaluator {
-    
-    pub fn new(input_string: ~str) -> Evaluator {
+
+    pub fn new(input_string: String) -> Evaluator {
         Evaluator {
-            parser: ~parser::Parser::new(input_string)
+            parser: Box::new(parser::Parser::new(input_string))
         }
     }
 
-    pub fn eval(&mut self) -> Result<~Value, ~str> {
+    pub fn eval(&mut self) -> Result<Box<Value>, String> {
         let tree = self.parser.parse_next_statement(); //TODO: Should loop?
         match tree {
             Ok(node) => {
-                eval_node(node)
+                eval_node(&node)
             },
             Err(msg) => {
                 Err(msg)

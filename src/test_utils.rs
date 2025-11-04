@@ -1,5 +1,5 @@
-pub fn test_assert(value: bool, message: ~str) {
+pub fn test_assert(value: bool, message: String) {
     if !value {
-        fail!(message);
+        panic!(message);
     }
 }
