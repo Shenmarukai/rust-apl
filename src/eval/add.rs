@@ -1,4 +1,4 @@
-use extra::complex::{Cmplx, Complex64};
+use num::complex::{Complex, Complex64};
 
 use nodes;
 use eval::eval::{Value, eval_dyadic};
@@ -13,7 +13,7 @@ fn add_float(f: f64, other:&Value) -> Result<Box<Value>, String> {
             add_float(f, &Value::AplFloat(val as f64))
         },
         &Value::AplComplex(_val) => {
-            add_complex(&Cmplx::new(f, 0.0), other)
+            add_complex(&Complex::new(f, 0.0), other)
         },
         &Value::AplArray(_, _, _) => {
             simple_dyadic_array(add_float, f, other)
@@ -30,7 +30,7 @@ fn add_integer(i: isize, other:&Value) -> Result<Box<Value>, String> {
             Ok(Box::new(Value::AplInteger(i + val)))
         },
         &Value::AplComplex(_val) => {
-            add_complex(&Cmplx::new(i as f64, 0.0), other)
+            add_complex(&Complex::new(i as f64, 0.0), other)
         },
         &Value::AplArray(_, _, _) => {
             simple_dyadic_array(add_integer, i, other)
@@ -41,10 +41,10 @@ fn add_integer(i: isize, other:&Value) -> Result<Box<Value>, String> {
 fn add_complex(c: &Complex64, other: &Value) -> Result<Box<Value>, String> {
     match other {
         &Value::AplFloat(f) => {
-            add_complex(c, &Value::AplComplex(Cmplx::new(f, 0.0)))
+            add_complex(c, &Value::AplComplex(Complex::new(f, 0.0)))
         },
         &Value::AplInteger(i) => {
-            add_complex(c, &Value::AplComplex(Cmplx::new(i as f64, 0.0)))
+            add_complex(c, &Value::AplComplex(Complex::new(i as f64, 0.0)))
         },
         &Value::AplComplex(other_c) => {
             Ok(Box::new(Value::AplComplex(c + other_c)))
