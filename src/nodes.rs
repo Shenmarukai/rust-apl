@@ -1,24 +1,24 @@
-use tokenizer::Token;
-use tokenizer::TokenData;
-use eval::eval::Value;
-use parser::Parser;
+use crate::tokenizer::Token;
+use crate::tokenizer::TokenData;
+use crate::eval::eval::Value;
+use crate::parser::Parser;
 
-use eval::add::eval_addition;
-use eval::subtract::eval_subtraction;
-use eval::multiply::eval_multiplication;
-use eval::divide::eval_division;
-use eval::maximum::eval_maximum;
-use eval::minimum::eval_minimum;
-use eval::exponential::eval_exponential;
+use crate::eval::add::eval_addition;
+use crate::eval::subtract::eval_subtraction;
+use crate::eval::multiply::eval_multiplication;
+use crate::eval::divide::eval_division;
+use crate::eval::maximum::eval_maximum;
+use crate::eval::minimum::eval_minimum;
+use crate::eval::exponential::eval_exponential;
 
-use eval::conjugate::eval_conjugate;
-use eval::negate::eval_negate;
-use eval::reciprocal::eval_reciprocal;
-use eval::sign::eval_sign;
-use eval::magnitude::eval_magnitude;
-use eval::ceiling::eval_ceiling;
-use eval::floor::eval_floor;
-use eval::power::eval_power;
+use crate::eval::conjugate::eval_conjugate;
+use crate::eval::negate::eval_negate;
+use crate::eval::reciprocal::eval_reciprocal;
+use crate::eval::sign::eval_sign;
+use crate::eval::magnitude::eval_magnitude;
+use crate::eval::ceiling::eval_ceiling;
+use crate::eval::floor::eval_floor;
+use crate::eval::power::eval_power;
 
 pub trait EvalNode {
     fn eval(&self) -> Result<Box<Value>, String>;

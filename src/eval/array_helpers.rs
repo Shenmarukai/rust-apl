@@ -1,4 +1,4 @@
-use eval::eval::Value;
+use crate::eval::eval::Value;
 use std::result;
 
 pub fn simple_dyadic_array<T: Clone, F>(func: F, param: T, other: &Value) -> result::Result<Box<Value>, String> where F: Fn(T, &Value) -> result::Result<Box<Value>, String> {

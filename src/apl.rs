@@ -1,5 +1,5 @@
-use eval::eval::Evaluator;
-use eval::eval::Printable;
+use rust_apl::eval::eval::Evaluator;
+use rust_apl::eval::eval::Printable;
 use std::io::{stdin, BufRead};
 
 fn main() {

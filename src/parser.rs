@@ -1,6 +1,6 @@
-use tokenizer;
-use tokenizer::Token;
-use nodes::{Node, Parseable};
+use crate::tokenizer;
+use crate::tokenizer::Token;
+use crate::nodes::{Node, Parseable};
 
 pub struct Parser {
     tokenizer: Box<tokenizer::Tokenizer>,

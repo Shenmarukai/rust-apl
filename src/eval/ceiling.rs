@@ -1,8 +1,8 @@
 use num::complex::Complex;
-use nodes;
+use crate::nodes;
 
-use eval::array_helpers::{simple_monadic_array};
-use eval::eval::{Value, eval_monadic};
+use crate::eval::array_helpers::{simple_monadic_array};
+use crate::eval::eval::{Value, eval_monadic};
 
 pub fn ceiling(first: &Value) -> Result<Box<Value>, String> {
     match first {

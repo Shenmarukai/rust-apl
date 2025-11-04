@@ -1,8 +1,8 @@
 use num::complex::{Complex, Complex64};
 
-use nodes;
-use eval::eval::{Value, eval_dyadic};
-use eval::array_helpers::{simple_dyadic_array, dual_dyadic_array, inverse_simple_dyadic_array};
+use crate::nodes;
+use crate::eval::eval::{Value, eval_dyadic};
+use crate::eval::array_helpers::{simple_dyadic_array, dual_dyadic_array, inverse_simple_dyadic_array};
 
 fn power_float(f: f64, other:&Value) -> Result<Box<Value>, String> {
     match other {
@@ -21,7 +21,7 @@ fn power_float(f: f64, other:&Value) -> Result<Box<Value>, String> {
             }
         },
         &Value::AplComplex(c) => {
-            let fpow = f.powf(&c.re);
+            let fpow = f.powf(c.re);
             let im_times_lnf = c.im * f.ln();
             let real =  fpow * im_times_lnf.cos();
             let imaginary = fpow * im_times_lnf.sin();

@@ -1,10 +1,9 @@
 use std::str;
 use num::complex::{Complex, Complex64};
 
-use parser;
-use nodes;
-use tokenizer;
-use nodes::EvalNode;
+use crate::parser;
+use crate::nodes::{self, EvalNode};
+use crate::tokenizer;
 
 pub trait Printable {
     fn to_string(&self) -> String;
@@ -71,7 +70,7 @@ pub fn eval_node(node: &nodes::Node) -> Result<Box<Value>,String> {
 fn eval_array(tokens: &Vec<Box<tokenizer::Token>>) -> Box<Value> {
     if tokens.len() == 1 {
         match &tokens[0].as_ref() {
-            &tokenizer::Token::Number(ref token_data) => {
+            &tokenizer::Token::Number(token_data) => {
                 eval_number(&token_data.string)
             },
             _ => {
@@ -140,7 +139,7 @@ fn eval_complex(left: &str, right: &str) -> Box<Value> {
             Box::new(Value::AplComplex(Complex::new(left_final, right_final)))
         },
         _ => {
-            panic!(format!("Bad complex {} {}", left, right))
+            panic!("Bad complex {} {}", left, right)
         }
     }
 }
@@ -157,7 +156,7 @@ fn eval_float(token_string: &str) -> Box<Value> {
             }
         },
         None => {
-            panic!(format!("Bad float {}", token_string))
+            panic!("Bad float {}", token_string)
         }
     }
 }
@@ -174,7 +173,7 @@ fn eval_int(token_string: &str) -> Box<Value> {
             }
         },
         None => {
-            panic!(format!("Bad int {}", token_string))
+            panic!("Bad int {}", token_string)
         }
     }
 }

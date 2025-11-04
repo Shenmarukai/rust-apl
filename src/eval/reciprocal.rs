@@ -1,7 +1,7 @@
-use nodes;
+use crate::nodes;
 
-use eval::eval::{Value, eval_monadic};
-use eval::divide::divide_integer;
+use crate::eval::eval::{Value, eval_monadic};
+use crate::eval::divide::divide_integer;
 
 pub fn reciprocal(first: &Value) -> Result<Box<Value>, String> {
     divide_integer(1, first)

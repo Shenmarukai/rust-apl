@@ -1,8 +1,8 @@
 use num::complex::{Complex, Complex64};
 
-use nodes;
-use eval::eval::{Value, eval_dyadic};
-use eval::array_helpers::{simple_dyadic_array, dual_dyadic_array, inverse_simple_dyadic_array};
+use crate::nodes;
+use crate::eval::eval::{Value, eval_dyadic};
+use crate::eval::array_helpers::{simple_dyadic_array, dual_dyadic_array, inverse_simple_dyadic_array};
 
 fn subtract_float(f: f64, other:&Value) -> Result<Box<Value>, String> {
     match other {

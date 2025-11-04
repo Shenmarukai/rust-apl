@@ -1,9 +1,9 @@
-use nodes;
+use crate::nodes;
 
-use eval::array_helpers::{simple_monadic_array};
-use eval::eval::{Value, eval_monadic};
-use eval::divide::divide;
-use eval::magnitude::magnitude;
+use crate::eval::array_helpers::{simple_monadic_array};
+use crate::eval::eval::{Value, eval_monadic};
+use crate::eval::divide::divide;
+use crate::eval::magnitude::magnitude;
 
 pub fn sign(first: &Value) -> Result<Box<Value>, String> {
     match first {

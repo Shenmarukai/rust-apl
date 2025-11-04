@@ -1,5 +1,3 @@
-//use std::{str, char};
-
 #[derive(Clone, Debug)]
 pub struct TokenData {
     pub string: String,
