@@ -1,0 +1,157 @@
+name: Nightly Release
+
+on:
+  schedule:
+    - cron: "0 3 * * *"  # 03:00 UTC daily
+  workflow_dispatch:
+
+concurrency:
+  group: nightly-release
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build nightly ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Linux
+          - os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+          - os: ubuntu-22.04-arm64
+            target: aarch64-unknown-linux-gnu
+          # macOS
+          - os: macos-13
+            target: x86_64-apple-darwin
+          - os: macos-14
+            target: aarch64-apple-darwin
+          # Windows
+          - os: windows-2022
+            target: x86_64-pc-windows-msvc
+          - os: windows-2022
+            target: aarch64-pc-windows-msvc
+
+    env:
+      CARGO_TERM_COLOR: always
+      BIN_NAME: rust-apl
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust (nightly)
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Set up MSVC for x64
+        if: runner.os == 'Windows' && matrix.target == 'x86_64-pc-windows-msvc'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: amd64
+
+      - name: Set up MSVC for ARM64
+        if: runner.os == 'Windows' && matrix.target == 'aarch64-pc-windows-msvc'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: amd64_arm64
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: nightly-${{ matrix.target }}
+          cache-on-failure: true
+
+      - name: Build
+        run: cargo build --release --target ${{ matrix.target }} --bins
+
+      - name: Compute nightly tag suffix (Unix)
+        if: runner.os != 'Windows'
+        id: nightly_date_unix
+        shell: bash
+        run: |
+          echo "DATE=$(date -u +%Y%m%d)" >> "$GITHUB_OUTPUT"
+
+      - name: Compute nightly tag suffix (Windows)
+        if: runner.os == 'Windows'
+        id: nightly_date_win
+        shell: pwsh
+        run: |
+          $d = Get-Date -Format "yyyyMMdd"
+          "DATE=$d" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - name: Package (Unix)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          set -euxo pipefail
+          target='${{ matrix.target }}'
+          bin="$BIN_NAME"
+          date="${{ steps.nightly_date_unix.outputs.DATE }}"
+          version="nightly-$date"
+          archive="${BIN_NAME}-${version}-${target}.tar.gz"
+          mkdir -p package dist
+          cp "target/$target/release/$bin" "package/$bin"
+          tar -C package -czf "dist/$archive" "$bin"
+          echo "ASSET_NAME=$archive" >> "$GITHUB_ENV"
+          echo "ASSET_PATH=dist/$archive" >> "$GITHUB_ENV"
+
+      - name: Package (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $binName = "$env:BIN_NAME.exe"
+          $target = "${{ matrix.target }}"
+          $date = "${{ steps.nightly_date_win.outputs.DATE }}"
+          $version = "nightly-$date"
+          $archive = "$env:BIN_NAME-$version-$target.zip"
+          New-Item -ItemType Directory -Path package,dist -Force | Out-Null
+          Copy-Item "target/$target/release/$binName" "package/$binName"
+          Compress-Archive -Path "package/*" -DestinationPath "dist/$archive"
+          "ASSET_NAME=$archive" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+          "ASSET_PATH=dist/$archive" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ASSET_NAME }}
+          path: ${{ env.ASSET_PATH }}
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: Publish Nightly
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Compute date
+        id: d
+        shell: bash
+        run: echo "DATE=$(date -u +%Y-%m-%d)" >> "$GITHUB_OUTPUT"
+
+      - name: Create/Update Nightly Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: nightly
+          name: Nightly ${{ steps.d.outputs.DATE }}
+          commitish: ${{ github.sha }}
+          prerelease: true
+          allowUpdates: true
+          replacesArtifacts: true
+          makeLatest: false
+          generateReleaseNotes: false
+          artifacts: dist/**
