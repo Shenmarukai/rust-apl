@@ -18,7 +18,7 @@
   - This would enable apl to operate in more resource constrained environments like micro-controllers.
   - This could enable zero cost *unit tagged* operator specialization.
   - This could enable making APL a performant inline language like [rust-cpp](https://github.com/mystor/rust-cpp) does with C++.
- 
+
 ## Personal Motivations
 I have been working on a large neural-networks and robotics library in rust *originally in c++* under the organization: [AtomuranRobotics](https://github.com/AtomuranRobotics), and I realized I spent so much time trying to decide *how* to implement the mathematics
 instead of just *implementing* the darn mathematics. I yearned to be able to just write the mathematics in a consise way but the implementations to do so would wrap right back around to the original problem.

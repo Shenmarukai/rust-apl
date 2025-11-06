@@ -26,7 +26,6 @@ pub enum Value {
 }
 
 impl Printable for Value {
-
 	fn to_string(&self) -> String {
 		match *self {
 			Value::AplFloat(f) => {
